@@ -3,12 +3,12 @@ use swc_ecma_ast::*;
 use swc_ecma_visit::Visit;
 
 pub struct ImportVisitor {
-    imports: Vec<String>,
+    pub(crate) imports: Vec<String>,
 }
 
 
 impl ImportVisitor {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         ImportVisitor { imports: vec![] }
     }
 }

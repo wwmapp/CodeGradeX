@@ -1,3 +1,4 @@
+mod visitor;
 use swc_common::{
     FileName,
     SourceMap,
@@ -7,60 +8,8 @@ use swc_ecma_parser::{Parser, StringInput, Syntax, TsConfig};
 use std::fs;
 use std::path::Path;
 use std::io::{self, Write};
-use swc_ecma_ast::*;
 use swc_ecma_visit::Visit;
-struct Scorer {
-    score: i32,
-}
-struct ImportVisitor {
-    imports: Vec<String>,
-}
-impl Scorer {
-    fn new() -> Self {
-        Scorer { score: 0 }
-    }
-}
-
-impl Visit for Scorer {
-    fn visit_fn_decl(&mut self, f: &FnDecl) {
-        let base_score = 10;
-        let mut func_score = base_score;
-
-        // 减分: 如果函数超过10行
-        let line_span = f.function.span;
-        let line_diff = line_span.hi.0 - line_span.lo.0;
-        if line_diff > 10 {
-            func_score -= 1;
-        }
-
-        // 减分: 如果函数使用了 `any` 类型
-        for param in &f.function.params {
-            if let Pat::Ident(pat_ident) = &param.pat {
-                if let Some(ref ts_type_ann) = pat_ident.type_ann {
-                    if let TsType::TsKeywordType(keyword) = &*ts_type_ann.type_ann {
-                        if let TsKeywordTypeKind::TsAnyKeyword = keyword.kind {
-                            func_score -= 2;
-                        }
-                    }
-                }
-            }
-        }
-
-        self.score += func_score;
-    }
-}
-impl ImportVisitor {
-    fn new() -> Self {
-        ImportVisitor { imports: vec![] }
-    }
-}
-
-impl Visit for ImportVisitor {
-    fn visit_import_decl(&mut self, node: &ImportDecl) {
-        self.imports.push(node.src.value.to_string());
-    }
-}
-
+use visitor::{scorer::Scorer, import_visitor::ImportVisitor};
 fn main() {
     print!("Please enter the path to the input file: ");
     io::stdout().flush().unwrap(); // 使得上面的print!立即显示，不需要等待换行

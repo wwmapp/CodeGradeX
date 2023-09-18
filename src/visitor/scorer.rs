@@ -3,11 +3,11 @@ use swc_ecma_ast::*;
 use swc_ecma_visit::Visit;
 
 pub struct Scorer {
-    score: i32,
+    pub(crate) score: i32,
 }
 
 impl Scorer {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Scorer { score: 0 }
     }
 }
